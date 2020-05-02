@@ -1,164 +1,123 @@
-// ***ASK*** how not to be confused with who is player-1 and player-2,
+// ***ASK*** how not be confused with who is player-1 and player-2,
 // aslo players[0] or players[1],
 // also 'X' or 'O'
 let players = ['x', 'o'];
-let activePlayer = 0;
+let activePlayer;
 let fieldSize = 3;
 let winLenght = 3;
 let board = [];
 
-function startGame() {
-    // ask user for field size and win length
-    // ***TODO*** need alert
-    do {
-        fieldSize = + prompt('Введите размер поля. Не меньше 3', 3);
-        winLenght = + prompt('Введите длинну линии для победы. Не меньше 3 и не больше размера поля', 3);
-    } while (winLenght > fieldSize || winLenght < 3 || fieldSize < 3)
+startGame();
 
-    // ***ASK*** take error with decimal point in math.round?
-    activePlayer = Math.round(Math.random());
+function startGame() {    
+    if (getFieldSize()) {
+        // ***ASK*** take error with decimal point in math.round in account?
+        activePlayer = Math.round(Math.random());
+        setNewBoard();
+        renderBoard(board);
+    }
+}
 
-    // ***ASK*** is it correct way to reset array?
+function setNewBoard() {
     board = [];
-
-    //create and array of array
-    for (let i = 0; i < fieldSize; i++) {
+    
+    for (let i  = 0; i < fieldSize; i++) {
         board[i] = [];
         
         for (let j = 0; j < fieldSize; j++) {
             board[i][j] = '';
         }
+    } 
+}
+
+function getFieldSize () {
+    fieldSize = +document.getElementById("field-size").value;
+    winLenght = +document.getElementById("wictory-line").value;
+
+    if (winLenght > fieldSize ||
+            winLenght < 3 ||
+            winLenght > 10 ||
+            fieldSize < 3 ||
+            fieldSize > 10) {
+        showAlertFieldSize();
+        return false;
     }
 
-    renderBoard(board);
+    console.log("fieldSize " + fieldSize);
+    console.log("winLenght " + winLenght);
+
+    return true;
+}
+
+function showAlertFieldSize() {
+    alert(`Введите правильные значения:
+    
+    Размер поля: от 3 до 10
+    
+    Длинну линии для победы от 3 до 10
+    и не больше размера поля`)
 }
 
 function click(row, col) {
-    //update and render field
-    board[row][col] = activePlayer ? 'x' : 'o';
+    // update and render field
+    board[row][col] = activePlayer ? 'o' : 'x';
     renderBoard(board);
 
-    if (checkWinner() === 'x') {
-        showWinner(0);
-    } else if (checkWinner() === 'o') {
-        showWinner(1);
-    }
+    // check winner 
+    if (isWinner(players[activePlayer])) {
+        showWinner(activePlayer);
+    } 
 
-    //new active player
+    // new active player
     activePlayer = activePlayer ? 0 : 1;
 }
 
-// ***ASK*** isn't checkWinner too long and complicated?
-// ***TODO*** code for checking for along function
+// ***ASK*** isn't isWinner too long and complicated?
 
-function checkWinner() {
-    let winnerX = 0;
-    let winnerZero = 0;
+function isWinner(simbol) {
     
     //check rows
     for (let i = 0; i < fieldSize; i++) {
-        winnerX = 1;
-        winnerZero = 1;
-        
-        for (let j = 1; j < fieldSize; j++ ) {
-            
-            if (board[i][j] === board[i][j-1] && board[i][j] === 'x') {
-                winnerX++;
-                winnerZero = 1;
-            }
-
-            if (board[i][j] === board[i][j-1] && board[i][j] === 'o') {
-                winnerZero++;
-                winnerX = 1;
-            }
-
-            // ***ASK*** is this kind of return type is correct?
-            if (winnerX === winLenght) {
-                return 'x';
-            }
-
-            if (winnerZero === winLenght) {
-                return 'o';
-            }
+        if (isWinnerInLine(i, 0, 0, 1, fieldSize - 1, simbol)) {
+            return true;
         }
     }
 
     //check columns
     for (let i = 0; i < fieldSize; i++) {
-        winnerX = 1;
-        winnerZero = 1;
-        
-        for (let j = 1; j < fieldSize; j++ ) {
-            
-            if (board[j][i] === board[j-1][i] && board[j][i] === 'x') {
-                winnerX++;
-                winnerZero = 1;
-            }
-
-            if (board[j][i] === board[j-1][i] && board[j][i] === 'o') {
-                winnerZero++;
-                winnerX = 1;
-            }
-
-            // ***ASK*** is this kind of return type is correct?
-            if (winnerX === winLenght) {
-                return 'x';
-            }
-
-            if (winnerZero === winLenght) {
-                return 'o';
-            }
+        if (isWinnerInLine(0, i, 1, 0, fieldSize - 1, simbol)) {
+            return true;
         }
     }
 
-    // check for both diagonal
+    
+    // both diagolals
+    // ***ASK*** nuberOfDiagonalToCheck is constant for single field. Is it better to count in once in askFieldSize
+    // or to keep it here?
     let nuberOfDiagonalToCheck = 2 * (fieldSize - winLenght) + 1;
 
+    
     //check for left-top to right-bottom 
-    let startRowForCheck = fieldSize - winLenght;
-    let startColForCheck = 0;
+    
+    //set start cell & step for both diagonal
+    let row = fieldSize - winLenght;
+    let col = 0;
     let steps = winLenght - 1;
     
-    //check mechanic
-    //each diagonal
     for (let i = 0; i < nuberOfDiagonalToCheck; i++) {
         
-        let row = startRowForCheck;
-        let col = startColForCheck;
-        winnerX = 1;
-        winnerZero = 1;
+        if (isWinnerInLine(row, col, 1, 1, steps, simbol)) {
+            return true;
+        }
 
-        //in each diagonal
-        for (let j = 0; j < steps; j++) {
-            if (board[row][col] === board[row+1][col+1] && board[row][col] === 'x') {
-                winnerX++;
-                winnerZero = 1;
-            }
-
-            if (board[row][col] === board[row+1][col+1] && board[row][col] === 'o') {
-                winnerZero++;
-                winnerX = 1;
-            }
-
-            if (winnerX === winLenght) {
-                return 'x';
-            }
-
-            if (winnerZero === winLenght) {
-                return 'o';
-            }
-
-            row++;
+        //update start cell for next LT-RB diagonal
+        if (row) {
+            row--;
+        } else {
             col++;
         }
 
-        //update start position for next diagonal
-        if (startRowForCheck) {
-            startRowForCheck--;
-        } else {
-            startColForCheck++;
-        }
-
+        //update step for next diagonal (any)
         if (steps < fieldSize - 1) {
             steps++;
         } else {
@@ -166,58 +125,50 @@ function checkWinner() {
         }
     }
 
+   
     //check for left-bottom to right-top
-    startRowForCheck = winLenght - 1;
-    startColForCheck = 0;
+    row = winLenght - 1;
+    col = 0;
     steps = winLenght - 1;
     
-    //check mechanic
-    //each diagonal
     for (let i = 0; i < nuberOfDiagonalToCheck; i++) {
-        
-        row = startRowForCheck;
-        col = startColForCheck;
-        winnerX = 1;
-        winnerZero = 1;
+        if (isWinnerInLine(row, col, -1, 1, steps, simbol)) {
+            return true;
+        }
 
-        console.log('row for lb to rt: ' + row);
-        console.log('col for lb to rt: ' + col);
-
-        //in each diagonal
-        for (let j = 0; j < steps; j++) {
-            if (board[row][col] === board[row-1][col+1] && board[row][col] === 'x') {
-                winnerX++;
-                winnerZero = 1;
-            }
-
-            if (board[row][col] === board[row-1][col+1] && board[row][col] === 'o') {
-                winnerZero++;
-                winnerX = 1;
-            }
-
-            if (winnerX === winLenght) {
-                return 'x';
-            }
-
-            if (winnerZero === winLenght) {
-                return 'o';
-            }
-
-            row--;
+        //update start position for next LB-RT diagonal
+        if (row < fieldSize - 1) {
+            row++;
+        } else {
             col++;
         }
 
-        //update start position for next diagonal
-        if (startRowForCheck < fieldSize - 1) {
-            startRowForCheck++;
-        } else {
-            startColForCheck++;
-        }
-
+        //update step for next diagonal (any)
         if (steps < fieldSize - 1) {
             steps++;
         } else {
             steps--;
         }
+    }
+}
+
+function isWinnerInLine(row, col, rowStep, colStep, steps, symbol) {
+
+    let winner = 1;
+        
+    for (let i = 0; i < steps; i++ ) {
+        
+        if (board[row][col] === board[row + rowStep][col + colStep] && board[row][col] === symbol) { 
+            winner++;
+            if (winner === winLenght) {
+                // ***ASK*** May be "super.return" here?
+                return true;
+            }
+        } else {
+            winner = 1;
+        }
+
+        row += rowStep;
+        col += colStep;
     }
 }

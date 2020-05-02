@@ -29,17 +29,38 @@ function showWinner(winner) {
 
 function renderBoard(board) {
   const fields = [];
+
+  let symbolsize = Math.floor(0.8 * (450 - board.length - 1) / board.length);
+  
+  const symbolX = `<svg class="symbol-x" height="${symbolsize}" width="${symbolsize}">
+      <line class="symbol-x__line line-1" x1="20%" y1="20%" x2="80%" y2="80%"></line>
+      <line class="symbol-x__line line-2" x1="20%" y1="80%" x2="80%" y2="20%"></line>
+      </svg>`;
+  
+  const symbolO = `<svg class="symbol-o" height="${symbolsize}" width="${symbolsize}">
+      <circle class="symbol-o_circle" r="33%" cx="50%" cy="50%"></circle>
+      </svg>`;
+
+
   for (let [i, row] of board.entries()) {
     for (let [j, value] of row.entries()) {
+      let symbolForCell = '';
+
+      if (value === 'x') {
+        symbolForCell = symbolX;
+      } else if (value === 'o') {
+        symbolForCell = symbolO;
+      }
+
       fields.push(`
         <div class="field ${value ? 'busy' : 'free'}" 
             data-row="${i}" 
             data-col="${j}"
             style="grid-row:${i + 1};grid-column:${j + 1};"
         >
-          ${value || ''}
+        ${symbolForCell}
         </div>
-      `);
+      `); //  ${value || ''} ${symbolForCell}
     }
   }
   boardEl.innerHTML = fields.join('');
