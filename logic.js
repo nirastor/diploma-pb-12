@@ -21,7 +21,7 @@ function startGame() {
 function setNewBoard() {
     board = [];
     
-    for (let i  = 0; i < fieldSize; i++) {
+    for (let i = 0; i < fieldSize; i++) {
         board[i] = [];
         
         for (let j = 0; j < fieldSize; j++) {
@@ -70,7 +70,7 @@ function click(row, col) {
 function isWinner(simbol, rowToCheck, colToCheck) {
 
     // initial conditions
-    let steps = 2 * (winLenght - 1);
+    let steps = 2 * winLenght - 2;
     let startRow = rowToCheck - winLenght + 1;
     let startCol = colToCheck - winLenght + 1;
     let startColPlus = colToCheck + winLenght - 1;
@@ -109,10 +109,16 @@ function isWinnerInLine(row, col, rowStep, colStep, steps, symbol) {
         // if beyond the field => continue;
         if (row < 0 ||
             col < 0 ||
-            row + rowStep > fieldSize - 1 ||
+            row > fieldSize - 1 ||
+            col > fieldSize - 1 ||
             row + rowStep < 0 ||
-            col + colStep > fieldSize - 1||
-            col + colStep < 0) {
+            col + colStep < 0 ||
+            row + rowStep > fieldSize - 1 ||
+            col + colStep > fieldSize - 1) {
+                
+                row += rowStep;
+                col += colStep;
+                
                 continue;
             }
 
