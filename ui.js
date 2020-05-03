@@ -41,6 +41,23 @@ function renderBoard(board) {
       <circle class="symbol-o_circle" r="33%" cx="50%" cy="50%"></circle>
       </svg>`;
 
+  let borderRadius = "14px";
+
+  if (board.length > 10) {
+    boardEl.style.gridGap = "3px";
+    borderRadius = "0";
+  } else if (board.length > 7) {
+    boardEl.style.gridGap = "3px";
+    borderRadius = "3px";
+
+  } else if (board.length > 5) {
+    boardEl.style.gridGap = "5px";
+    borderRadius = "8px";
+
+  } else {
+    boardEl.style.gridGap = "10px";
+    borderRadius = "14px";
+  }
 
   for (let [i, row] of board.entries()) {
     for (let [j, value] of row.entries()) {
@@ -56,11 +73,11 @@ function renderBoard(board) {
         <div class="field ${value ? 'busy' : 'free'}" 
             data-row="${i}" 
             data-col="${j}"
-            style="grid-row:${i + 1};grid-column:${j + 1};"
+            style="grid-row:${i + 1};grid-column:${j + 1};border-radius:${borderRadius};"
         >
         ${symbolForCell}
         </div>
-      `); //  ${value || ''} ${symbolForCell}
+      `); //  ${value || ''} or ${symbolForCell}
     }
   }
   boardEl.innerHTML = fields.join('');
